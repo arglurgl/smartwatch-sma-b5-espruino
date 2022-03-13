@@ -552,25 +552,25 @@ NRF.on('disconnect',function(reason) {
 });
 */
 
-var fc=new SPI(); // font chip - 2MB SPI flash
+var fc=new SPI(); // font chip - 2MB SPI flash, can be accessed via 'Flash' module
 D12.write(1);
 fc.setup({sck:D14,miso:D11,mosi:D13,mode:0});
 fc.send([0xab],D12); // wake from deep sleep (needs to be done before require("Flash") commands work)
+fc.send([0xb9],D12); // put to deep sleep
 
-var page = 0;
+
 flash = require("Flash")
-function printPage(){
-
+function printPage(page){
+  fc.send([0xab],D12); // wake from deep sleep (needs to be done before require("Flash") commands work)
   
   print("page="+page.toString());
   pageData=flash.read(256,0x60000000 + page*256)
-  page++;
 
   msg = "";
   for (var x of pageData)msg+=(256+x).toString(16).substr(-2);
   print(msg);
-  //fc.send([0xb9],D12); // put to deep sleep
-  setTimeout(printPage,1);
+  
+  fc.send([0xb9],D12); // put to deep sleep
 }
 
 
