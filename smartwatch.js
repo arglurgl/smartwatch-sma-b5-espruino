@@ -555,13 +555,22 @@ NRF.on('disconnect',function(reason) {
 var fc=new SPI(); // font chip - 2MB SPI flash
 D12.write(1);
 fc.setup({sck:D14,miso:D11,mosi:D13,mode:0});
-fc.send([0xb9],D12); //put to deep sleep
+fc.send([0xab],D12); // wake from deep sleep (needs to be done before require("Flash") commands work)
 
-/*
-//print(fc.send([0xab],D23)); // wake from deep sleep
-//print(fc.send([0x90,0,0,1,0,0],D23));
-//print(fc.send([0x9f,0,0,0],D23));
-//print(fc.send([0xb9],D23)); // put to deep sleep
-var w25 = require("W25");
-var fc = new w25(fc, D23 );
-*/
+var page = 0;
+flash = require("Flash")
+function printPage(){
+
+  
+  print("page="+page.toString());
+  pageData=flash.read(256,0x60000000 + page*256)
+  page++;
+
+  msg = "";
+  for (var x of pageData)msg+=(256+x).toString(16).substr(-2);
+  print(msg);
+  //fc.send([0xb9],D12); // put to deep sleep
+  setTimeout(printPage,1);
+}
+
+
