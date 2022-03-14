@@ -512,14 +512,23 @@ function clock(){
   },250);
 }
 
+function accelerometer(){
+  kx022_init(); // we need to disable acc later to save power
+  plot_acc();
+  return setInterval(function(){
+    plot_acc();
+  },100);
+}
+
 function sleep(){
   g.clear();//g.flip();
   g.off();
+  kx022_write(KX022_CNTL1, 0x00); //disable accelerometer to save power
   currscr=-1;
   return 0;
 }
 
-var screens=[clock,info,ble_scan,randomShapes,randomLines,sleep];
+var screens=[clock,info,accelerometer,ble_scan,randomShapes,randomLines,sleep];
 var currscr= -1;
 var currint=0;
 setWatch(function(){
@@ -559,12 +568,12 @@ fc.send([0xab],D12); // wake from deep sleep (needs to be done before require("F
 fc.send([0xb9],D12); // put to deep sleep
 
 
-flash = require("Flash")
+flash = require("Flash");
 function printPage(page){
   fc.send([0xab],D12); // wake from deep sleep (needs to be done before require("Flash") commands work)
   
   print("page="+page.toString());
-  pageData=flash.read(256,0x60000000 + page*256)
+  pageData=flash.read(256,0x60000000 + page*256);
 
   msg = "";
   for (var x of pageData)msg+=(256+x).toString(16).substr(-2);
@@ -575,7 +584,7 @@ function printPage(page){
 
 // accelerometer test
 // set up I2C
-i2c = new I2C() //only works with software i2c?
+i2c = new I2C(); //only works with software i2c?
 i2c.setup({ scl : 18, sda: 17 });
 
 KX022_XOUT_L =0x06;
@@ -610,7 +619,7 @@ function kx022_init(){
     }
     kx022_write(KX022_CNTL1, 0x00); //disable
     kx022_write(KX022_CNTL2, 0xBF); //reset to get rid of old configuration
-    cntl2 = 0
+    cntl2 = 0;
     while (cntl2 != 0x3f){ //wait for reset to finish
       cntl2 = kx022_read(KX022_CNTL2,1);
     }
@@ -618,7 +627,7 @@ function kx022_init(){
     //leave CNTL3 at reset values
     kx022_write(KX022_ODCNTL, 0x02); // set data rate and filter (50Hz, Filter on)    
     kx022_write(KX022_CNTL1, 0x80);//enable operation
-    delayms(40)//wait for transition to 'on'
+    delayms(40);//wait for transition to 'on'
     print("KX022 init finished");
 }
 
@@ -631,14 +640,16 @@ function kx022_getAcc()
       z: d.getInt16(4,1) / 16384
     };
 }
- 
-function printAccData(){
+
+function plot_acc(){
+  g.clear();
   accs = kx022_getAcc();
-  print(accs.x);
-  print(accs.y);
-  print(accs.z);
-  setTimeout(printAccData,100);
+  g.setFont("4x6",1/*2*/);g.setColor(10);
+  g.drawString("x: "+accs.x.toFixed(3),5,10);
+  g.drawString("y: "+accs.y.toFixed(3),5,22);
+  g.drawString("z: "+accs.z.toFixed(3),5,34);
+  g.flip();
 }
- 
-kx022_init();
-//printAccData();
+
+
+E.setTimeZone(1)
