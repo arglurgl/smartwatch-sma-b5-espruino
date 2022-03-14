@@ -608,11 +608,17 @@ function kx022_init(){
     if (wai != KX022_WAI_VAL) {
         print("kx022: unexpected who am i value");
     }
-    kx022_write(KX022_CNTL1, 0x00);
-    kx022_write(KX022_ODCNTL, 0x02);
-    kx022_write(KX022_CNTL3, 0xD8);
-    kx022_write(KX022_TILT_TIMER, 0x01);
-    kx022_write(KX022_CNTL1, 0xC1);
+    kx022_write(KX022_CNTL1, 0x00); //disable
+    kx022_write(KX022_CNTL2, 0xBF); //reset to get rid of old configuration
+    cntl2 = 0
+    while (cntl2 != 0x3f){ //wait for reset to finish
+      cntl2 = kx022_read(KX022_CNTL2,1);
+    }
+    //leave CNTL2 at reset values
+    //leave CNTL3 at reset values
+    kx022_write(KX022_ODCNTL, 0x02); // set data rate and filter (50Hz, Filter on)    
+    kx022_write(KX022_CNTL1, 0x80);//enable operation
+    delayms(40)//wait for transition to 'on'
     print("KX022 init finished");
 }
 
@@ -627,7 +633,7 @@ function kx022_getAcc()
 }
  
 function printAccData(){
-  accs = kx022_getAcc()
+  accs = kx022_getAcc();
   print(accs.x);
   print(accs.y);
   print(accs.z);
