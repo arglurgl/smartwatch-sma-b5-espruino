@@ -45,6 +45,7 @@ info = {
      'LDFLAGS += -Xlinker --defsym=LD_APP_RAM_BASE=0x2c40', # set RAM base to match MTU
      'DEFINES+=-DNO_DUMP_HARDWARE_INITIALISATION', # don't dump hardware init - not used and saves 1k of flash
 #     'DEFINES+=-DJSVAR_FORCE_16_BYTE=1', # 16 byte variables
+     'DEFINES+=-DSPIFLASH_SLEEP_CMD', # SPI flash needs to be explicitly slept and woken up
      'DEFINES+=-DBLUETOOTH_NAME_PREFIX=\'"B5"\'',
      'DEFINES+=-DUSE_FONT_6X8 -DBLE_HIDS_ENABLED=1 -DGRAPHICS_PALETTED_IMAGES=1 -DGRAPHICS_FAST_PATHS=1',
      'NRF_BL_DFU_INSECURE=1',
