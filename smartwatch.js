@@ -637,8 +637,24 @@ function plot_acc(){
   g.drawString("x: "+accs.x.toFixed(3),5,10);
   g.drawString("y: "+accs.y.toFixed(3),5,22);
   g.drawString("z: "+accs.z.toFixed(3),5,34);
+  
+  y1=100; //y middle/zero position
+  h1g=50; // height at 1g
+  xstart=5;
+  xstep=5;
+  width=20;
+  col= 10;
+  x1=xstart;
+  x2=x1+width;
+  for (axis in accs){
+    g.setColor(col);
+    col++;
+    y2 = Math.round( y1 + accs[axis]*h1g*(-1));
+    g.fillRect(x1,Math.min(y1,y2),x2, Math.max(y1,y2));
+    x1=x2+xstep;
+    x2=x1+width;
+  }
   g.flip();
 }
 
-
-E.setTimeZone(1)
+E.setTimeZone(1);
