@@ -72,14 +72,38 @@ chip = {
   'adc' : 1,
   'dac' : 0,
   'saved_code' : {
+    #original experimental two bank (strange when ':' in filename)
+#     'page_size' : 4096,
+#     'address' : ((118 - 16) * 4096), # Bootloader takes pages 120-127, FS takes 118-119
+# #    'address' : ((118 - 10) * 4096), # Bootloader takes pages 120-127, FS takes 118-119
+#     'pages' : 16, #10
+# #    'flash_available' : 512 - ((28 + 8 + 2 + 10)*4) # Softdevice 2.0 uses 28 pages of flash, bootloader 8, FS 2, code 10. Each page is 4 kb.
+#     'flash_available' : 512 - ((31 + 8 + 2 + 16)*4), # Softdevice 3.0 uses 31 pages of flash, bootloader 8, FS 2, code 10. Each page is 4 kb.
+# #    'flash_available' : 512 - ((35 + 8 + 10 + 10)*4) # Softdevice 5.0  uses 35 pages of flash, bootloader 8, FS 2, code 10. Each page is 4 kb.
+# #    'flash_available' : 512 - ((38 + 8 + 2 +16)*4) # Softdevice 6.x  uses 38 pages of flash, bootloader 8, FS 2, no code. Each page is 4 kb.
+#     'address2' : 0x60000000, # second bank (for second 'drive' of storage module, see jsflash.c) in external spiflash (see below)
+#     'pages2' : 512, # Entire 2MB of external flash
+#     #10 pages version from comments
+#     'page_size' : 4096,
+#     'address' : ((118 - 10) * 4096), # Bootloader takes pages 120-127, FS takes 118-119
+#     'pages' : 10,
+# #    'flash_available' : 512 - ((28 + 8 + 2 + 10)*4) # Softdevice 2.0 uses 28 pages of flash, bootloader 8, FS 2, code 10. Each page is 4 kb.
+#     'flash_available' : 512 - ((31 + 8 + 2 + 10)*4), # Softdevice 3.0 uses 31 pages of flash, bootloader 8, FS 2, code 10. Each page is 4 kb.
+# #    'flash_available' : 512 - ((35 + 8 + 10 + 10)*4) # Softdevice 5.0  uses 35 pages of flash, bootloader 8, FS 2, code 10. Each page is 4 kb.
+# #    'flash_available' : 512 - ((38 + 8 + 2 +16)*4) # Softdevice 6.x  uses 38 pages of flash, bootloader 8, FS 2, no code. Each page is 4 kb.
+#     'address2' : 0x60000000, # second bank (for second 'drive' of storage module, see jsflash.c) in external spiflash (see below)
+#     'pages2' : 512, # Entire 2MB of external flash
+    #single-bank external version
     'page_size' : 4096,
-    'address' : ((118 - 16) * 4096), # Bootloader takes pages 120-127, FS takes 118-119
-#    'address' : ((118 - 10) * 4096), # Bootloader takes pages 120-127, FS takes 118-119
-    'pages' : 16, #10
+    #'address' : ((118 - 10) * 4096), # Bootloader takes pages 120-127, FS takes 118-119
+    #'pages' : 10,
 #    'flash_available' : 512 - ((28 + 8 + 2 + 10)*4) # Softdevice 2.0 uses 28 pages of flash, bootloader 8, FS 2, code 10. Each page is 4 kb.
-    'flash_available' : 512 - ((31 + 8 + 2 + 16)*4) # Softdevice 3.0 uses 31 pages of flash, bootloader 8, FS 2, code 10. Each page is 4 kb.
+    'flash_available' : 512 - ((31 + 8 + 2 + 10)*4), # Softdevice 3.0 uses 31 pages of flash, bootloader 8, FS 2, code 10. Each page is 4 kb.
 #    'flash_available' : 512 - ((35 + 8 + 10 + 10)*4) # Softdevice 5.0  uses 35 pages of flash, bootloader 8, FS 2, code 10. Each page is 4 kb.
 #    'flash_available' : 512 - ((38 + 8 + 2 +16)*4) # Softdevice 6.x  uses 38 pages of flash, bootloader 8, FS 2, no code. Each page is 4 kb.
+    'address' : 0x60000000, # second bank (for second 'drive' of storage module, see jsflash.c) in external spiflash (see below)
+    'pages' : 512, # Entire 2MB of external flash
+
   },
 };
 
