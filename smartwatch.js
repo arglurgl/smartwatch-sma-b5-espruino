@@ -513,7 +513,7 @@ function clock(){
 }
 
 function accelerometer(){
-  kx022_init(); // we need to disable acc later to save power
+  accelKX022.enable();
   plot_acc();
   return setInterval(function(){
     plot_acc();
@@ -523,7 +523,7 @@ function accelerometer(){
 function sleep(){
   g.clear();//g.flip();
   g.off();
-  kx022_write(KX022_CNTL1, 0x00); //disable accelerometer to save power
+  accelKX022.disable();
   currscr=-1;
   return 0;
 }
@@ -576,63 +576,11 @@ function printPage(page){
 i2c = new I2C(); //only works with software i2c?
 i2c.setup({ scl : 18, sda: 17 });
 
-KX022_XOUT_L =0x06;
-KX022_XOUT_H =0x07;
-KX022_YOUT_L =0x08;
-KX022_YOUT_H =0x09;
-KX022_ZOUT_L =0x0A;
-KX022_ZOUT_H =0x0B;
-KX022_WHO_AM_I=0x0F;
-KX022_CNTL1  =0x18;
-KX022_CNTL2  =0x19;
-KX022_CNTL3  =0x1A;
-KX022_ODCNTL =0x1B;
-KX022_TILT_TIMER=0x22;
-
-KX022_WAI_VAL=0x14;
-
-function kx022_read(reg, len){ // read
-  i2c.writeTo({address:0x1f,stop:true}, reg);
-  return i2c.readFrom(0x1f, len);
-}
-function kx022_write(reg, data) { // write
-  i2c.writeTo(0x1f, [reg, data]);
-}
-
-function kx022_init(){ 
-    print("KX022 init start");
-
-    wai = kx022_read(KX022_WHO_AM_I,1);
-    if (wai != KX022_WAI_VAL) {
-        print("kx022: unexpected who am i value");
-    }
-    kx022_write(KX022_CNTL1, 0x00); //disable
-    kx022_write(KX022_CNTL2, 0xBF); //reset to get rid of old configuration
-    cntl2 = 0;
-    while (cntl2 != 0x3f){ //wait for reset to finish
-      cntl2 = kx022_read(KX022_CNTL2,1);
-    }
-    //leave CNTL2 at reset values
-    //leave CNTL3 at reset values
-    kx022_write(KX022_ODCNTL, 0x02); // set data rate and filter (50Hz, Filter on)    
-    kx022_write(KX022_CNTL1, 0x80);//enable operation
-    delayms(40);//wait for transition to 'on'
-    print("KX022 init finished");
-}
-
-function kx022_getAcc()
-{ 
-    var d = new DataView(kx022_read(KX022_XOUT_L, 6).buffer);
-    return {
-      x: d.getInt16(0,1) / 16384,
-      y: d.getInt16(2,1) / 16384,
-      z: d.getInt16(4,1) / 16384
-    };
-}
+accelKX022 = require("KX022.js").connect(i2c);
 
 function plot_acc(){
   g.clear();
-  accs = kx022_getAcc();
+  accs = accelKX022.getAcc();
   g.setFont("4x6",1/*2*/);g.setColor(10);
   g.drawString("x: "+accs.x.toFixed(3),5,10);
   g.drawString("y: "+accs.y.toFixed(3),5,22);
@@ -646,7 +594,7 @@ function plot_acc(){
   col= 10;
   x1=xstart;
   x2=x1+width;
-  for (axis in accs){
+  for (var axis in accs){
     g.setColor(col);
     col++;
     y2 = Math.round( y1 + accs[axis]*h1g*(-1));
