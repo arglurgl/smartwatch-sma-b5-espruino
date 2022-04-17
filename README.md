@@ -16,7 +16,8 @@ This is a smartwatch application for an [SMA B5](https://www.smawatch.com/page41
   - make sure your bluetooth adapter supports BLE
   - click the "connect/disconnect" button and then "status" to see if the IDE can use your bluetooth adapter
     -  on linux you need to enable 'experimental features' in Chrome to use web bluetooth
-  - copy the code and upload it to the watch ("send to Espruino")
+  - upload the modules in the 'modules' folder to the storage of the watch (storage button looks like stacked disks in Web IDE)
+  - copy the smartwatch.js to the editor window (or open file) and upload to the watch ("send to Espruino", chip with arrow icon)
   - touch the button and the watch should wake up and do something :)
 
 
