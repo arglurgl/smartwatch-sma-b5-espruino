@@ -242,8 +242,10 @@ function ble_scan(){
       devices.sort(function(a, b){return b.rssi - a.rssi;});
       devices.forEach(function(item,idx){
           idString="N/A";
-          if (item.name) idString= item.name;
-          else if (item.id) idString=item.id;
+          if (item.name){
+            idString= item.name;
+            if (idString[0]=='B' && idString[1]=='5' && idString[2]==' ') vibrate(1,1,100,0); //alarm for other B5 watches
+          }else if (item.id) idString=item.id;
           g.drawString(idString,0,8+idx*8);
           if (item.rssi) g.drawString(item.rssi,68,8+idx*8,true);
       });
