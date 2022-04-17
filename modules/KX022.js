@@ -42,11 +42,21 @@ KX022.prototype.enable = function(){
 
 KX022.prototype.init = function () {
     print("KX022 init start");
-
-    wai = this.read(REG.WHO_AM_I, 1);
-    if (wai != C.WAI_VAL) {
-        print("kx022: error: unexpected 'who am i' value");
-        return
+    wai=undefined;
+    tries=5
+    while(tries>0){
+        wai = this.read(REG.WHO_AM_I, 1);
+        if (wai != C.WAI_VAL) {
+            print("kx022: error: unexpected 'who am i' value:");
+            print(wai)
+        }else{
+            break;
+        }
+        tries--;
+    }
+    if (tries==0){
+        print("all tries failed, aborting");
+        return;
     }
     this.write(REG.CNTL1, 0x00); //disable
     this.write(REG.CNTL2, 0xBF); //reset to get rid of old configuration
