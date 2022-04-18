@@ -15,6 +15,8 @@ const REG = {
 
 const C = {
     WAI_VAL: 0x14,
+    INIT_RETRY_DELAY: 50,
+    INIT_ENABLE_DELAY: 40,
 }
 
 function KX022(i2c) {
@@ -42,22 +44,19 @@ KX022.prototype.enable = function(){
 
 KX022.prototype.init = function () {
     print("KX022 init start");
-    wai=undefined;
-    tries=5
-    while(tries>0){
-        wai = this.read(REG.WHO_AM_I, 1);
-        if (wai != C.WAI_VAL) {
-            print("kx022: error: unexpected 'who am i' value:");
-            print(wai)
-        }else{
-            break;
-        }
-        tries--;
+    var self = this ; //for access in callbacks
+
+    wai = this.read(REG.WHO_AM_I, 1);
+    if (wai != C.WAI_VAL) {
+        print("kx022: error: unexpected 'who am i' value:"); //sometimes we get 0xff after resetting the watch
+        print(wai)
+        print("will retry init later")
+        setTimeout(function () {
+            self.init();
+        },C.INIT_RETRY_DELAY)
+        return 
     }
-    if (tries==0){
-        print("all tries failed, aborting");
-        return;
-    }
+
     this.write(REG.CNTL1, 0x00); //disable
     this.write(REG.CNTL2, 0xBF); //reset to get rid of old configuration
     cntl2 = 0;
@@ -68,11 +67,11 @@ KX022.prototype.init = function () {
     //leave CNTL3 at reset values
     this.write(REG.ODCNTL, 0x02); // set data rate and filter (50Hz, Filter on)    
     this.enable();
-    var self = this ; //for access in callback
+    
     setTimeout(function () {
         print("kx022 init done")
         self.initDone= true;
-      }, 40);
+      }, C.INIT_ENABLE_DELAY);
 }
 
 KX022.prototype.getAcc = function () {
