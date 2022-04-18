@@ -6,7 +6,7 @@ var wdint=setInterval(KickWd,2000);
 E.enableWatchdog(20, false);
 E.kickWatchdog();
 
-
+// var vibon=2;
 
 var VIB=D30;
 function vibon(vib){
@@ -395,6 +395,20 @@ function plot_acc(){
     x2=x1+width;
   }
   g.flip();
+}
+
+function displaypng(){
+  g.clear();
+  g.drawpng('gameover.png');
+
+}
+function display_image(src, width, height, alt) {
+    var a = document.createElement("img");
+    a.src = src;
+    a.width = width;
+    a.height = height;
+    a.alt = alt;
+    document.body.appendChild(a);
 }
 
 E.setTimeZone(2);
