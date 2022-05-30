@@ -96,10 +96,28 @@ function gpsoff(){
 
 //new gps test
 D7.write(0);
+lastdata = undefined;
+lastspeed = 0;
 Serial1.setup(9600,{tx:D27,rx:D28});
 var gps = require("GPS").connect(Serial1, function(data) {
   console.log(data);
+  if (lastdata!=undefined){
+    dist=distance(data,lastdata);
+    t2=parseInt(data.time.substr(6,2));
+    t1=parseInt(lastdata.time.substr(6,2));
+    timediff=t2-t1;
+    speed=dist/timediff*60*60/1000;
+    console.log(speed);
+    lastspeed = speed;
+  }
+  lastdata = data;
 });
+
+function distance(point1, point2) {
+  var degToRad = Math.PI / 180;
+  R = 6371000;// meters
+  return R * degToRad * Math.sqrt(Math.pow(Math.cos(point1.lat * degToRad ) * (point1.lon - point2.lon) , 2) + Math.pow(point1.lat - point2.lat, 2));
+}
 
 function gpson(){
   D7.write(1);
@@ -223,6 +241,7 @@ function info(){
 }
 
 function ble_scan(){
+  gpsoff();
   if (!g.isOn) g.on();
   g.setFont("4x6",1/*2*/);g.setColor(10);
   g.clear();
@@ -290,7 +309,7 @@ function drawClock(){
   g.drawLine(sx,1,71,1);
   //g.setFont8x16();
 */
-  g.setFontVector(18); 
+  g.setFontVector(18);
   g.setColor(8+3);
   var dt=/*d[0]+" "+*/d[1]+" "+d[2];//+" "+d[3];
   g.drawString(dt,40-g.stringWidth(dt)/2,140);
@@ -312,15 +331,33 @@ function accelerometer(){
   },100);
 }
 
+function speed(){
+  gpson();
+  draw_speed();
+  return setInterval(function(){
+    draw_speed();
+  },1000);
+}
+
+function draw_speed(){
+  g.clear();
+  g.setFontVector(30);
+  g.setColor(8+2);
+  g.drawString(lastspeed.toFixed(1),5,10);
+ 
+  g.flip();
+}
+
 function sleep(){
   g.clear();//g.flip();
+  gpsoff();
   g.off();
   accelKX022.disable();
   currscr=-1;
   return 0;
 }
 
-var screens=[clock,info,accelerometer,ble_scan,randomShapes,randomLines,sleep];
+var screens=[clock,info,accelerometer,speed,ble_scan,randomShapes,randomLines,sleep];
 var currscr= -1;
 var currint=0;
 setWatch(function(){
@@ -377,7 +414,7 @@ function plot_acc(){
   g.drawString("x: "+accs.x.toFixed(3),5,10);
   g.drawString("y: "+accs.y.toFixed(3),5,22);
   g.drawString("z: "+accs.z.toFixed(3),5,34);
-  
+ 
   y1=100; //y middle/zero position
   h1g=50; // height at 1g
   xstart=5;
