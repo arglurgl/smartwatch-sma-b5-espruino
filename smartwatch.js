@@ -98,20 +98,47 @@ function gpsoff(){
 D7.write(0);
 lastdata = undefined;
 lastspeed = 0;
+lasttrackdata = undefined;
+lasttrackdist = 0 ;
+trackthreshold = 20.0; //meters to last tracked point
+trackpoints = 0 ;
 Serial1.setup(9600,{tx:D27,rx:D28});
 var gps = require("GPS").connect(Serial1, function(data) {
   console.log(data);
+  //calc speed to last point
   if (lastdata!=undefined){
     dist=distance(data,lastdata);
     t2=parseInt(data.time.substr(6,2));
     t1=parseInt(lastdata.time.substr(6,2));
     timediff=t2-t1;
-    speed=dist/timediff*60*60/1000;
-    console.log(speed);
-    lastspeed = speed;
+    myspeed=dist/timediff*60*60/1000;
+    console.log(myspeed);
+    lastspeed = myspeed;
   }
   lastdata = data;
+
+  //save tracking point
+  if (data != undefined && !isNaN(data.lon) && !isNaN(data.lat)){//valid data?
+    if (lasttrackdata == undefined){//no last track point -> save current value directly
+      savepoint(data);
+    }else{//existing last point
+      lasttrackdist = distance(lasttrackdata,data);
+      console.log('Dist:');
+      console.log(lasttrackdist);
+      if (lasttrackdist > trackthreshold){ //we moved enough?
+        savepoint(data);
+      }
+    }
+  }
 });
+
+var f = require("Storage").open("track","a");
+function savepoint(point) {
+  lasttrackdata = point;
+  f.write(getTime().toFixed(1)+","+point.lat.toFixed(5)+","+point.lon.toFixed(5)+"\n");
+  trackpoints++;
+  console.log('New point logged');
+}
 
 function distance(point1, point2) {
   var degToRad = Math.PI / 180;
@@ -344,6 +371,8 @@ function draw_speed(){
   g.setFontVector(30);
   g.setColor(8+2);
   g.drawString(lastspeed.toFixed(1),5,10);
+  g.drawString(lasttrackdist.toFixed(1),5,50);
+  g.drawString(trackpoints,5,90);
  
   g.flip();
 }
