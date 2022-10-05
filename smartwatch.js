@@ -33,6 +33,9 @@ function battLevel(v){
   return 100*(v-l)/(h-l);
 }
 function battInfo(v){v=v?v:battVolts();return `${battLevel(v)|0}% ${v.toFixed(2)}V`;}
+//charge indicator:
+pinMode(D24, 'input_pullup');
+function charging(){return!digitalRead(D24);}
 
 /*var GPS ={
 GPTXT : function(a){
@@ -312,7 +315,8 @@ function drawClock(){
   if (lastsec%10==0){
     batt=battInfo(volts);volts=0;
   }
-  g.setFont("6x8",1);g.setColor(15);
+  g.setFont("6x8",1);
+  if (charging()){g.setColor(8+2);}else{g.setColor(15);}
   g.drawString(batt,40-g.stringWidth(batt)/2,0);
   g.setFontVector(50);
   g.setColor(8+2);
