@@ -106,7 +106,7 @@ lasttrackdist = 0 ;
 trackthreshold = 20.0; //meters to last tracked point
 trackpoints = 0 ;
 Serial1.setup(9600,{tx:D27,rx:D28});
-var gps = require("GPS").connect(Serial1, function(data) {
+var gps = require("B5GPS.js").connect(Serial1, function(data) {
   console.log(data);
   //calc speed to last point
   if (lastdata!=undefined){
