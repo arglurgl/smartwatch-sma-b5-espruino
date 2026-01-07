@@ -7,5 +7,8 @@ in the 'boards' folder, then execute from Espruino root folder:
 
 (See also https://github.com/espruino/Espruino/blob/master/README_Building.md)
 
-Flash the resulting zip with the Nordic android tools (nRF connect). To enter update mode on the SMA B5, press touch button until device reboots, then release. Screen will be blank, but device should appear as 'DFUTARG' via BLE in
-Nordic nRF connect scan. Then quickly connect to it to stay in update mode und flash the zip file.
+Flash the resulting zip with the Nordic android tools (nRF connect, nRf toolbox, nRF device Firmware Update). To enter update mode on the SMA B5:
+* Option A: Press and hold touch button until device reboots. Immediately when the screen goes blank start mashing the touch button quickly. If the LCD screen turns on try again.
+* Option B: Connect to the watch with nRF Toolbox, hold touch button, and simultaneously send ```E.reboot()[ENTER/LF]``` to the device e.g. with nRF Toolbox. Release button after 1-2 seconds.
+
+Screen will be blank and should stay so when pressing the touch button, but device should appear as "B5 ABCD"/"DfuTarg" with a Nordic DFU Service via BLE in Nordic nRF connect scan. Then quickly connect to it with nRF device Firmware Update to stay in update mode und flash the zip file.
