@@ -157,8 +157,8 @@ function gpsoff(){
   D7.write(0);
 }
 
-bpp=4;
-g=require("B5LCD.js").connect(bpp);
+bpp=12;
+//g=require("B5LCD.js").connect(bpp);
 
 function randomLines(){
   g.clear();
@@ -166,7 +166,7 @@ function randomLines(){
   return setInterval(function(){
     g.setColor(1+r()*cols);
     g.drawLine(r()*w,r()*h,r()*w,r()*h);
-      g.flip();
+      //g.flip();
   },5);
 }
 
@@ -184,8 +184,20 @@ function randomShapes(){
       g.fillEllipse(Math.min(x1,x2), Math.min(y1,y2),Math.max(x1,x2), Math.max(y1,y2));
     else
       g.fillRect(Math.min(x1,x2), Math.min(y1,y2),Math.max(x1,x2), Math.max(y1,y2));
-    g.flip();
+    //g.flip();
   },5);
+}
+
+function rainbow(angle){
+  var red,green,blue;
+  if (angle<60) {red = 15; green = Math.round(angle*0.25-0.01); blue = 0;} else
+  if (angle<120) {red = Math.round((120-angle)*0.25-0.01); green = 15; blue = 0;} else 
+  if (angle<180) {red = 0, green = 15; blue = Math.round((angle-120)*0.25-0.01);} else 
+  if (angle<240) {red = 0, green = Math.round((240-angle)*0.25-0.01); blue = 15;} else 
+  if (angle<300) {red = Math.round((angle-240)*0.25-0.01), green = 0; blue = 15;} else 
+                 {red = 15, green = 0; blue = Math.round((360-angle)*0.25-0.01);} 
+  ret = (red<<8) | (green<<4) | blue;
+  return ret;
 }
 
 // cube from https://www.espruino.com/Pixl.js+Cube+Badge
@@ -240,9 +252,9 @@ function drawCube(xx,yy,zz) {
 function stepCube() {
   rx += 0.05;
   ry += 0.05;
-  g.setColor(0);g.fillRect(0,40,80,120);g.setColor(1+8+(cc/20%7));cc=(cc+1);
+  g.setColor(0);g.fillRect(0,40,80,120);g.setColor(rainbow(cc*4%360));cc=(cc+1);
   drawCube(40,80,80);
-  g.flip();
+  //g.flip();
 }
 //require("Font6x8").add(Graphics);
 //require("Font6x12").add(Graphics);
@@ -251,20 +263,17 @@ function stepCube() {
 
 function info(){
   g.clear();
-  g.setFont("4x6",1/*2*/);g.setColor(10);
+  g.setFont("4x6",1/*2*/);g.setColor(0x0f0);
   g.drawString("Espruino "+process.version,5,10);
-  if (bpp==1) g.flip();
-  g.setFont("4x6",1);g.setColor(14);
+  //if (bpp==1) //g.flip();
+  g.setFont("4x6",1);g.setColor(0xff0);
   g.drawString("ST7735 12 bit mode\n8Mbps SPI with DMA\nmoped",4,22);
-  if (bpp==1) g.flip();
-  for (var c=0;c<8;c++){
-    g.setColor(c+8);g.fillRect(8+8*c,130,16+8*c,138);
-    if (bpp==1) g.flip();
+  //if (bpp==1) //g.flip();
+  for (var c=0;c<64;c++){
+    g.setColor(rainbow(c*360/64));g.fillRect(8+c,130,9+c,150);
+    //if (bpp==1) //g.flip();
   }
-  for ( c=0;c<8;c++) {g.setColor(c);g.fillRect(8+8*c,142,16+8*c,150);
-    if (bpp==1) g.flip();
-  }
-  g.flip();
+  //g.flip();
   return setInterval(function(){
     stepCube();
   },5);
@@ -272,15 +281,15 @@ function info(){
 
 function ble_scan(){
   gpsoff();
-  if (!g.isOn) g.on();
-  g.setFont("4x6",1/*2*/);g.setColor(10);
+  if (!Bangle.isLCDOn()) Bangle.setLCDPower(1);
+  g.setFont("4x6",1/*2*/);g.setColor(0x0f0);
   g.clear();
   g.drawString("BLE Scanner",0,0,true);
-  g.flip();
+  //g.flip();
   return setInterval(function(){
     //g.fillRect(0,0,70,6);
     g.drawString("Scan...     ",0,0,true);
-    g.flip();
+    //g.flip();
     NRF.findDevices(function(d) {
       var devices;
       devices = d;
@@ -298,7 +307,7 @@ function ble_scan(){
           g.drawString(idString,0,8+idx*8);
           if (item.rssi) g.drawString(item.rssi,68,8+idx*8,true);
       });
-      g.flip();
+      //g.flip();
     }, 1500);
   },2000);
 }
@@ -316,10 +325,10 @@ function drawClock(){
     batt=battInfo(volts);volts=0;
   }
   g.setFont("6x8",1);
-  if (charging()){g.setColor(8+2);}else{g.setColor(15);}
+  if (charging()){g.setColor(0xf00);}else{g.setColor(0x0f0);}
   g.drawString(batt,40-g.stringWidth(batt)/2,0);
   g.setFontVector(50);
-  g.setColor(8+2);
+  g.setColor(0x0f0);
   d=d.toString().split(' ');
   var sec=d[4].substr(-2);
   //var tm=d[4].substring(0,5);
@@ -344,7 +353,7 @@ function drawClock(){
   g.setColor(8+3);
   var dt=/*d[0]+" "+*/d[1]+" "+d[2];//+" "+d[3];
   g.drawString(dt,40-g.stringWidth(dt)/2,140);
-  g.flip();
+  //g.flip();
 }
 function clock(){
   volts=null;
@@ -373,18 +382,18 @@ function speed(){
 function draw_speed(){
   g.clear();
   g.setFontVector(30);
-  g.setColor(8+2);
+  g.setColor(0x0f0);
   g.drawString(lastspeed.toFixed(1),5,10);
   g.drawString(lasttrackdist.toFixed(1),5,50);
   g.drawString(trackpoints,5,90);
  
-  g.flip();
+  //g.flip();
 }
 
 function sleep(){
   g.clear();//g.flip();
   gpsoff();
-  g.off();
+  Bangle.setLCDPower(0);
   accelKX022.disable();
   currscr=-1;
   return 0;
@@ -394,7 +403,7 @@ var screens=[clock,info,accelerometer,speed,ble_scan,randomShapes,randomLines,sl
 var currscr= -1;
 var currint=0;
 setWatch(function(){
-  if (!g.isOn) g.on();
+  if (!Bangle.isLCDOn()) Bangle.setLCDPower(1);
   currscr++;if (currscr>=screens.length) currscr=0;
   if (currint>0) clearInterval(currint);
   currint=screens[currscr]();
@@ -443,7 +452,7 @@ accelKX022 = require("KX022.js").connect(i2c);
 function plot_acc(){
   g.clear();
   accs = accelKX022.getAcc();
-  g.setFont("4x6",1/*2*/);g.setColor(10);
+  g.setFont("4x6",1/*2*/);g.setColor(0x0f0);
   g.drawString("x: "+accs.x.toFixed(3),5,10);
   g.drawString("y: "+accs.y.toFixed(3),5,22);
   g.drawString("z: "+accs.z.toFixed(3),5,34);
@@ -453,18 +462,27 @@ function plot_acc(){
   xstart=5;
   xstep=5;
   width=20;
-  col= 10;
   x1=xstart;
   x2=x1+width;
   for (var axis in accs){
-    g.setColor(col);
-    col++;
+    switch(axis) {
+      case "x":
+        g.setColor(0xf00);
+        break;
+      case "y":
+        g.setColor(0x0f0);
+        break;
+      case "z":
+        g.setColor(0x00f);
+        break;
+    }
     y2 = Math.round( y1 + accs[axis]*h1g*(-1));
     g.fillRect(x1,Math.min(y1,y2),x2, Math.max(y1,y2));
     x1=x2+xstep;
     x2=x1+width;
   }
-  g.flip();
+  //g.flip();
 }
 
-E.setTimeZone(2);
+E.setTimeZone(1);
+Bangle.setLCDPower(1)
