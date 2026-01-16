@@ -1,27 +1,3 @@
-E.kickWatchdog();
-function KickWd(){
-  if( (typeof(BTN1)=='undefined')||(!BTN1.read()) ) E.kickWatchdog();
-}
-var wdint=setInterval(KickWd,2000);
-E.enableWatchdog(20, false);
-E.kickWatchdog();
-
-
-
-var VIB=D30;
-function vibon(vib){
- if(vib.i>=1)VIB.set();else analogWrite(VIB,vib.i);
- setTimeout(viboff,vib.on,vib);
-}
-function viboff(vib){
- VIB.reset();
- if (vib.c>1){vib.c--;setTimeout(vibon,vib.off,vib);}
-}
-
-vibrate=function(intensity,count,onms,offms){
- vibon({i:intensity,c:count,on:onms,off:offms});
-};
-
 function battVolts(){
 return 4.20/0.320*analogRead(D4);
 }
@@ -364,7 +340,6 @@ function clock(){
 }
 
 function accelerometer(){
-  accelKX022.enable();
   plot_acc();
   return setInterval(function(){
     plot_acc();
@@ -390,25 +365,31 @@ function draw_speed(){
   //g.flip();
 }
 
-function sleep(){
-  g.clear();//g.flip();
-  gpsoff();
-  Bangle.setLCDPower(0);
-  accelKX022.disable();
-  currscr=-1;
-  return 0;
-}
-
-var screens=[clock,info,accelerometer,speed,ble_scan,randomShapes,randomLines,sleep];
-var currscr= -1;
+var screens=[clock,info,accelerometer,speed,ble_scan,randomShapes,randomLines];
+var currscr= 0;
 var currint=0;
-setWatch(function(){
-  if (!Bangle.isLCDOn()) Bangle.setLCDPower(1);
-  currscr++;if (currscr>=screens.length) currscr=0;
-  if (currint>0) clearInterval(currint);
-  currint=screens[currscr]();
-},BTN1,{ repeat:true, edge:'rising',debounce:25 }
+setWatch(
+  function(){
+    currscr++;
+    if (currscr>=screens.length) currscr=0;
+    if (currint>0) clearInterval(currint); // stop current screen
+    currint=screens[currscr](); // start new screen
+  },
+  BTN1,
+  {repeat:true, edge:'rising',debounce:25 }
 );
+
+// tidy up when display turns off
+Bangle.on('lcdPower',on=>{
+  if (!on) {//off
+    if (currint>0) clearInterval(currint); // stop current screen
+    gpsoff();
+    //g.clear();
+    //currscr= 0; // reset to clock
+  } else {//on
+    currint=screens[currscr](); // start current screen
+  }
+});
 
 /*
 NRF.whitelist=[];
@@ -443,15 +424,9 @@ function printPage(page){
 }
 
 // accelerometer test
-// set up I2C
-i2c = new I2C(); //only works with software i2c?
-i2c.setup({ scl : 18, sda: 17 });
-
-accelKX022 = require("KX022.js").connect(i2c);
-
 function plot_acc(){
   g.clear();
-  accs = accelKX022.getAcc();
+  accs = Bangle.getAccel();
   g.setFont("4x6",1/*2*/);g.setColor(0x0f0);
   g.drawString("x: "+accs.x.toFixed(3),5,10);
   g.drawString("y: "+accs.y.toFixed(3),5,22);
@@ -481,8 +456,31 @@ function plot_acc(){
     x1=x2+xstep;
     x2=x1+width;
   }
-  //g.flip();
 }
 
 E.setTimeZone(1);
-Bangle.setLCDPower(1)
+Bangle.setLCDPower(1);
+
+Bangle.setOptions({
+  gestureStartThresh: 640000,
+  gestureEndThresh: 4000000,
+  gestureInactiveCount: 4,
+  gestureMinLength: 10,
+  stepCounterThresholdLow: 1,
+  stepCounterThresholdHigh: 536876204,
+  twistThreshold: 800,
+  twistTimeout: 1000,
+  twistMaxY: -800,
+  wakeOnBTN1: true,
+  wakeOnBTN2: true,
+  wakeOnBTN3: true,
+  wakeOnFaceUp: false,
+  wakeOnTouch: false,
+  wakeOnDoubleTap: false,
+  wakeOnTwist: false,
+  powerSave: true,
+  manualWatchdog: false,
+  lockTimeout: 10000,
+  lcdPowerTimeout: 10000,
+  backlightTimeout: 10000,
+  btnLoadTimeout: 1500 });
