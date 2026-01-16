@@ -297,26 +297,29 @@ function drawClock(){
   if (d.getSeconds()==lastsec) return;
   lastsec=d.getSeconds();
   g.clear();
-  if (lastsec%10==0){
+  g.drawImage(require("Storage").read("nyan.img"), 0, 0);
+  if (lastsec%5==0){
     batt=battInfo(volts);volts=0;
   }
   g.setFont("6x8",1);
   if (charging()){g.setColor(0xf00);}else{g.setColor(0x0f0);}
   g.drawString(batt,40-g.stringWidth(batt)/2,0);
-  g.setFontVector(50);
-  g.setColor(0x0f0);
+  g.setFontVector(45);
   d=d.toString().split(' ');
   var sec=d[4].substr(-2);
   //var tm=d[4].substring(0,5);
   var hr=d[4].substr(0,2);
   var min=d[4].substr(3,2);
-  g.drawString(hr,40-g.stringWidth(hr)/2,15);
-  g.drawString(min,40-g.stringWidth(min)/2,80);
+  g.setColor(0x0f0);
+  g.drawString(hr,43-g.stringWidth(hr)/2,15);
+  g.setColor(0x00f);
+  g.drawString(min,43-g.stringWidth(min)/2,60);
   //g.setColor(8+4);
   g.setFontVector(28);
   //if (sec&1)g.drawString("o o",40-g.stringWidth("o o")/2,60);
   //if (sec&1)g.drawString(":",40-g.stringWidth(":")/2,42);
-  if (sec&1)g.drawString(". .",40-g.stringWidth(". .")/2,50);
+   g.setColor(0x0f0);
+  if (sec&1)g.drawString(". .",43-g.stringWidth(". .")/2,36);
 
 /*
   if (sec&1)g.drawString(":",36-g.stringWidth(":")/2,3);
@@ -328,7 +331,7 @@ function drawClock(){
   g.setFontVector(18);
   g.setColor(8+3);
   var dt=/*d[0]+" "+*/d[1]+" "+d[2];//+" "+d[3];
-  g.drawString(dt,40-g.stringWidth(dt)/2,140);
+  g.drawString(dt,40-g.stringWidth(dt)/2,144);
   //g.flip();
 }
 function clock(){
@@ -366,15 +369,17 @@ function draw_speed(){
 }
 
 var screens=[clock,info,accelerometer,speed,ble_scan,randomShapes,randomLines];
-var currscr= 0;
+var currscr= -1;
 var currint=0;
-setWatch(
-  function(){
+function switchScreen(){
     currscr++;
     if (currscr>=screens.length) currscr=0;
     if (currint>0) clearInterval(currint); // stop current screen
     currint=screens[currscr](); // start new screen
-  },
+  }
+
+setWatch(
+  switchScreen,
   BTN1,
   {repeat:true, edge:'rising',debounce:25 }
 );
@@ -458,9 +463,6 @@ function plot_acc(){
   }
 }
 
-E.setTimeZone(1);
-Bangle.setLCDPower(1);
-
 Bangle.setOptions({
   gestureStartThresh: 640000,
   gestureEndThresh: 4000000,
@@ -484,3 +486,7 @@ Bangle.setOptions({
   lcdPowerTimeout: 10000,
   backlightTimeout: 10000,
   btnLoadTimeout: 1500 });
+
+E.setTimeZone(1);
+Bangle.setLCDPower(1);
+switchScreen(); // start first screen
