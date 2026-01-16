@@ -388,7 +388,6 @@ setWatch(
 Bangle.on('lcdPower',on=>{
   if (!on) {//off
     if (currint>0) clearInterval(currint); // stop current screen
-    gpsoff();
     //g.clear();
     //currscr= 0; // reset to clock
   } else {//on
