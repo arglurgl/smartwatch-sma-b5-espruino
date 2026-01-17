@@ -1,0 +1,1 @@
+Upload these files to device storage via the WebIDEs upload functionality. The smartwatch.js code will load them during execution.
