@@ -115,19 +115,50 @@ HRS_write(REG.OFFSET_IDAC_HRS, 0x40); // HRS offset, device seems only to work w
 HRS_write(REG.PS_INTERVAL, 0x40); // PS measurement interval
 HRS_write(REG.LED_DRIVE, 0x86); // drive current
 
-HRS_write(REG.ENABLE, 0x44); //final enable
+HRS_write(REG.ENABLE, 0x07); //final enable
 
 dumpAllRegisters();
 
 
+
 print("---------------- start reading ----------------");
+
+var read_count = 0;
+var ref_corrected_hrs = 0;
+
 
 readHandle = setInterval(function() {
     var hrs = HRS_read24(REG.HRS_DATA_L);
-    var ps = HRS_read24(REG.PS1_DATA_L);
+    //var ps = HRS_read24(REG.PS1_DATA_L);
     var als1 = HRS_read24(REG.ALS_DATA1_L);
-    var als2 = HRS_read24(REG.ALS_DATA2_L);
-    print("HRS:", hrs,"ALS1:", als1, "PS:", ps, "ALS2:", als2);
+    // var als2 = HRS_read24(REG.ALS_DATA2_L);
+    // print("HRS:", hrs,"ALS1:", als1, "PS:", ps, "ALS2:", als2);
+    corrected_hrs = hrs - als1;
+    if (read_count == 0) {
+        ref_corrected_hrs = corrected_hrs;
+        read_count = 50;
+    }
+    print("HRS:", hrs, "ALS1:", als1, "Corrected HRS:", corrected_hrs, "Diff from ref:", (corrected_hrs - ref_corrected_hrs));
+    var diff = corrected_hrs - ref_corrected_hrs;
+
+    var SCALE = 50;
+    var HALF_WIDTH = 50;
+
+    var clamped = Math.max(
+    -HALF_WIDTH,
+    Math.min(HALF_WIDTH, diff / SCALE)
+    );
+
+    var left = clamped < 0 ? "#".repeat(-clamped) : "";
+    var right = clamped > 0 ? "#".repeat(clamped) : "";
+
+    print(
+    left.padStart(HALF_WIDTH, " ") +
+    "|" +
+    right.padEnd(HALF_WIDTH, " ")
+    );
+
+    read_count--;
 }, 100);
 
 // var HRS_ref= HRS_read24(REG.HRS_DATA_L);
