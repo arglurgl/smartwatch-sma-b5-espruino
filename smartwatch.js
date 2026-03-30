@@ -276,7 +276,7 @@ function ble_scan(){
           idString="N/A";
           if (item.name){
             idString= item.name;
-            if (idString[0]=='B' && idString[1]=='5' && idString[2]==' ') vibrate(1,1,100,0); //alarm for other B5 watches
+            if (idString[0]=='B' && idString[1]=='5' && idString[2]==' ') Bangle.buzz(); //alarm for other B5 watches
           }else if (item.id) idString=item.id;
           g.drawString(idString,0,8+idx*8);
           if (item.rssi) g.drawString(item.rssi,68,8+idx*8,true);
